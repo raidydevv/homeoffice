@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import logoHomeOffice from '../assets/logohomeoffice.png';
-import videoFile from '../assets/videoprositecomlegendatamanhotop.mp4';
+// import videoFile from '../assets/videoprositecomlegendatamanhotop.mp4';
 import { IoVolumeMute } from "react-icons/io5";
 
 declare global {
@@ -181,20 +181,18 @@ const Hero: React.FC = () => {
                       onPause={() => setIsPlaying(false)}
                       onEnded={() => setIsPlaying(false)}
                     >
-                      <source src={videoFile} type="video/mp4" />
+                      <source src="https://res.cloudinary.com/drhfjrq8a/video/upload/videoprositecomlegendatamanhotop_1_blnf5d.mp4" type="video/mp4" />
                       Seu navegador não suporta vídeos HTML5.
                     </video>
                     {/* Botão de áudio centralizado sobre o vídeo */}
-                    {isMuted && isPlaying && (
+                    {isMuted && (
                       <button
                         onClick={handleUnmute}
-                        className="absolute inset-0 flex items-center justify-center z-20"
-                        style={{ pointerEvents: 'auto' }}
+                        className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-80 rounded-full flex items-center justify-center shadow-2xl p-4 hover:bg-opacity-90 transition transform hover:scale-110"
                         aria-label="Ativar áudio"
+                        style={{ pointerEvents: 'auto' }}
                       >
-                        <span className="bg-black bg-opacity-80 rounded-full flex items-center justify-center shadow-2xl p-6 hover:bg-opacity-90 transition transform hover:scale-110">
-                          <IoVolumeMute className="w-14 h-14 text-white" />
-                        </span>
+                        <IoVolumeMute className="w-12 h-12 text-white" />
                       </button>
                     )}
                     {/* Controles personalizados */}

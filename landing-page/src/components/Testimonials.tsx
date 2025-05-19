@@ -1,20 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import videoTestimonyMan from '../assets/criativodocaracomlegenda.mp4';
-import videoTestimonyWoman from '../assets/CRIATIVOMUIECOMLEGENDA.mp4';
 import { IoVolumeMute } from "react-icons/io5";
 
 interface VideoPlayerProps {
-  src: string;
+  videoUrl: string;
   title: string;
   person: string;
   role: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, title, person, role }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, title, person, role }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Autoplay mutado quando entra em tela
   useEffect(() => {
@@ -32,15 +30,28 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, title, person, role }) =
       });
     };
     const observer = new window.IntersectionObserver(handleIntersection, { threshold: 0.5 });
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
     }
     return () => {
-      if (containerRef.current) observer.unobserve(containerRef.current);
+      if (videoRef.current) observer.unobserve(videoRef.current);
     };
   }, []);
 
-  // Função para ativar o áudio
+  // Atualiza a barra de progresso
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const updateProgress = () => {
+      const duration = video.duration || 1;
+      const current = video.currentTime;
+      const eased = Math.pow(current / duration, 0.85);
+      setProgress(eased);
+    };
+    video.addEventListener('timeupdate', updateProgress);
+    return () => video.removeEventListener('timeupdate', updateProgress);
+  }, [videoRef]);
+
   const handleUnmute = () => {
     if (videoRef.current) {
       videoRef.current.muted = false;
@@ -60,9 +71,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, title, person, role }) =
   };
 
   return (
-    <div ref={containerRef} className="bg-gray-900 rounded-xl shadow-xl overflow-hidden border border-gray-800 flex flex-col h-full">
+    <div className="bg-gray-900 rounded-xl shadow-xl overflow-hidden border border-gray-800 flex flex-col h-full">
       <div className="relative w-full aspect-video">
-        <video 
+        <video
           ref={videoRef}
           className="w-full h-full object-cover"
           preload="metadata"
@@ -72,27 +83,23 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, title, person, role }) =
           onPause={() => setIsPlaying(false)}
           onEnded={() => setIsPlaying(false)}
         >
-          <source src={src} type="video/mp4" />
+          <source src={videoUrl} type="video/mp4" />
           Seu navegador não suporta vídeos HTML5.
         </video>
-        {/* Botão de áudio centralizado sobre o vídeo */}
-        {isMuted && isPlaying && (
+        {isMuted && (
           <button
             onClick={handleUnmute}
-            className="absolute inset-0 flex items-center justify-center z-20"
-            style={{ pointerEvents: 'auto' }}
+            className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 bg-black bg-opacity-80 rounded-full flex items-center justify-center shadow-2xl p-4 hover:bg-opacity-90 transition transform hover:scale-110"
             aria-label="Ativar áudio"
+            style={{ pointerEvents: 'auto' }}
           >
-            <span className="bg-black bg-opacity-80 rounded-full flex items-center justify-center shadow-2xl p-6 hover:bg-opacity-90 transition transform hover:scale-110">
-              <IoVolumeMute className="w-14 h-14 text-white" />
-            </span>
+            <IoVolumeMute className="w-12 h-12 text-white" />
           </button>
         )}
-        {/* Controles personalizados */}
-        <div 
+        <div
           className="absolute top-0 left-0 w-full h-full flex items-center justify-center cursor-pointer"
           onClick={togglePlay}
-          style={{backgroundColor: isPlaying ? 'rgba(0, 0, 0, 0)' : 'rgba(0, 0, 0, 0.4)'}}
+          style={{ backgroundColor: isPlaying ? 'rgba(0, 0, 0, 0)' : 'rgba(0, 0, 0, 0.3)' }}
         >
           {!isPlaying && (
             <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-opacity-30 hover:scale-110">
@@ -101,6 +108,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, title, person, role }) =
               </svg>
             </div>
           )}
+        </div>
+        <div className="absolute left-0 right-0 bottom-0 h-2 bg-gray-700 rounded-b-md overflow-hidden z-30">
+          <div
+            className="h-full bg-gradient-to-r from-green-400 to-purple-600 transition-all duration-200"
+            style={{ width: `${progress * 100}%` }}
+          />
         </div>
       </div>
       <div className="p-5">
@@ -146,13 +159,13 @@ const Testimonials: React.FC = () => {
 
   const videoTestimonials = [
     {
-      src: videoTestimonyMan,
+      videoUrl: "https://res.cloudinary.com/drhfjrq8a/video/upload/criativodocaracomlegenda_brj6b9.mp4",
       title: "Como transformei minha carreira com o trabalho remoto",
       person: "Ricardo Silva",
       role: "Desenvolvedor Web"
     },
     {
-      src: videoTestimonyWoman,
+      videoUrl: "https://res.cloudinary.com/drhfjrq8a/video/upload/v1685641234/CRIATIVOMUIECOMLEGENDA_uayvdr.mp4",
       title: "Conquistei a liberdade geográfica e financeira",
       person: "Mariana Costa",
       role: "Designer"
@@ -205,7 +218,7 @@ const Testimonials: React.FC = () => {
             {videoTestimonials.map((video, index) => (
               <VideoPlayer
                 key={index}
-                src={video.src}
+                videoUrl={video.videoUrl}
                 title={video.title}
                 person={video.person}
                 role={video.role}
